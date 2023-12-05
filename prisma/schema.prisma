@@ -1,0 +1,23 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = "mongodb+srv://masingamasibonge:edl3UvPBdsRRT4XI@cluster0.rcl4va1.mongodb.net/myFirstDatabase"
+}
+
+model Post {
+    id       String   @id @default(auto()) @map("_id") @db.ObjectId
+    content  String
+    user     String
+    hashtags String[]
+}
+
+model SearchResults {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  query     String
+  results   String[]
+  users     String[]
+  timestamp DateTime @default(now())
+}
