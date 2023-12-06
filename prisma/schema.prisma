@@ -12,6 +12,7 @@ model Post {
     content  String
     user     String
     hashtags String[]
+    image    String 
 }
 
 model SearchResults {

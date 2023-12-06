@@ -2,7 +2,6 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const cors = require("cors");
-
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -11,7 +10,7 @@ app.use(cors());
 
 const PORT = process.env.PORT || 8080;
 
-app.get("/api/posts/", async (req, res) => {
+app.get("/api/posts/", async (_req, res) => {
     const posts = await prisma.post.findMany();
     res.json(posts);
 });
@@ -49,10 +48,12 @@ app.get("/api/posts/search/", async (req, res) => {
 });
 
 app.post("/api/posts/", async (req, res) => {
-    const { content, user, hashtags } = req.body;
+    const { content, user, hashtags, image } = req.body;
 
-    if (!content || !user) {
-        res.status(400).json({ error: "The 'content' or 'user' field is empty." });
+    console.log('hashtags', hashtags)
+
+    if (!content || !user || !image) {
+        res.status(400).json({ error: "The 'content', 'user' or 'image' field is empty." });
         return;
     }
 
@@ -61,6 +62,7 @@ app.post("/api/posts/", async (req, res) => {
             content: content,
             user: user,
             hashtags: hashtags,
+            image: image,
         },
     });
 
@@ -74,5 +76,5 @@ app.use(function (err, _req, res, _next) {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀Backend Server Started on PORT ${PORT}`);
+    console.log(`🚀ttagz Backend Server Started on PORT ${PORT}`);
 });
