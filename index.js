@@ -1,78 +1,44 @@
-const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const cors = require("cors");
+const { faker } = require('@faker-js/faker');
 
-const app = express();
+async function main() {
+  try {
+    await prisma.$connect();
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cors());
+    console.log("Prisma has been connected & dummy data has been created");
 
-const PORT = process.env.PORT || 8080;
-
-app.get("/api/posts/", async (req, res) => {
+    for (let i = 0; i < 20; i++) {
+      const randomHashtags = Array.from(
+        { length: Math.floor(Math.random() * 5) + 1 },
+        () => faker.lorem.word()
+      );
+      
+      await prisma.post.create({
+        data: {
+          content: faker.lorem.paragraph(),
+          user: `user${i}`,
+          hashtags: randomHashtags,
+        },
+      });
+    }
     const posts = await prisma.post.findMany();
-    res.json(posts);
-});
+    console.dir(posts, { depth: posts });
 
-app.get("/api/posts/search/", async (req, res) => {
-    const hashtag = req.query.hashtag;
+  } catch (error) {
+    console.log(error);
+    console.log("keys: ", Object.keys(error));
+    console.log("error.errorCode: ", (error).errorCode);
+    console.log("error.code: ", (error).code);
+    console.error(JSON.stringify(error, null, 2));
+  }
+}
 
-    if (!hashtag) {
-        res.status(400).json({ error: 'The "hashtag" query parameter is empty.' });
-        return;
-    }
-
-    const posts = await prisma.post.findMany({
-        where: {
-            hashtags: {
-                has: hashtag,
-            },
-        },
-    });
-
-    // Extract the IDs of the posts and the user details
-    const postIds = posts.map(post => post.id);
-    const users = posts.map(post => post.user);
-
-    // Store the Search Query in the Database
-    await prisma.searchResults.create({
-        data: {
-            query: hashtag,
-            results: postIds,
-            users: users,
-        },
-    });
-
-    res.json(posts);
-});
-
-app.post("/api/posts/", async (req, res) => {
-    const { content, user, hashtags } = req.body;
-
-    if (!content || !user) {
-        res.status(400).json({ error: "The 'content' or 'user' field is empty." });
-        return;
-    }
-
-    const post = await prisma.post.create({
-        data: {
-            content: content,
-            user: user,
-            hashtags: hashtags,
-        },
-    });
-
-    res.json(post);
-});
-
-app.use(function (err, _req, res, _next) {
-    console.error("error", err);
-    res.status(500);
-    res.send({ message: "Unfortunately a Technical Error Occurred" });
-});
-
-app.listen(PORT, () => {
-    console.log(`🚀Backend Server Started on PORT ${PORT}`);
-});
+main()
+  .catch(async (e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
