@@ -22,13 +22,13 @@ async function main() {
         //         },
         //     });
         // }
-        // const posts = await prisma.post.findMany();
-        // console.dir(posts, { depth: posts });
+        const posts = await prisma.post.findMany();
+        console.dir(posts, { depth: posts });
 
-        await prisma.post.deleteMany();
-        await prisma.searchResults.deleteMany();
+        // await prisma.post.deleteMany();
+        // await prisma.searchResults.deleteMany();
 
-        console.log("Dummy data has been deleted");
+        // console.log("Dummy data has been deleted");
 
     } catch (error) {
         console.log(error);
